@@ -1,0 +1,41 @@
+Try the results 
+https://assignment-func.azurewebsites.net/api/KeyVaultSecret?name=VaronisAssignmentKv1
+https://assignment-func.azurewebsites.net/api/KeyVaultSecret?name=VaronisAssignmentKv2
+https://assignment-func.azurewebsites.net/api/KeyVaultSecret?name=VaronisAssignmentKv3
+https://assignment-func.azurewebsites.net/api/KeyVaultSecret?name=NotExistOne 
+import logging
+import azure.functions as func
+import os
+from azure.identity import ManagedIdentityCredential
+from azure.keyvault.secrets  import SecretClient
+def main(req: func.HttpRequest) -> func.HttpResponse:
+    logging.info('Python HTTP trigger function processed a request.')
+    name = req.params.get('name')
+    if not name:
+        try:
+            req_body = req.get_json()
+        except ValueError:
+            pass
+        else:
+            name = req_body.get('name')
+    if name:
+        try:
+          credential = ManagedIdentityCredential()
+          secret_client = SecretClient(vault_url="https://"+name+".vault.azure.net/", credential=credential)
+          secret = secret_client.get_secret("VaronisAssignmentSecret")
+          created_on = secret.properties.created_on
+          httt_out = f"""
+          {'='*100}
+           Name of the Key Vault           =  { name }
+           Name of the Key Vault secret    =  VaronisAssignmentSecret
+           The Creation date of the secret =  { created_on }
+           The secret value                =  {secret.value}
+           {'='*100}
+          """ 
+        except:
+            return func.HttpResponse("Error ", status_code=200)
+        return func.HttpResponse(httt_out)
+    else:
+        return func.HttpResponse("Enter valid Key vault name name=< Key vault name>", status_code=200)
+
+
