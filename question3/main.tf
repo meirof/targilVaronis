@@ -1,4 +1,4 @@
-########## build teh loadBalncer with VM in North Europe  ###########
+########## build teh loadBalncer with VM in East Us  ###########
 resource "azurerm_resource_group" "gp_eastus" {
   name     = "gp_eastus"
   location = "eastus"
